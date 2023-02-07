@@ -27,22 +27,25 @@ class Widget_main(QtWidgets.QWidget, Admin):
         for row in range(self.tableWidget.rowCount()):
             item1 = self.tableWidget.item(row, 0)
             item1.setFlags(QtCore.Qt.ItemIsEnabled)
-            item2 = self.tableWidget.item(row, 2)
+            item2 = self.tableWidget.item(row, 3)
             item2.setFlags(QtCore.Qt.ItemIsEnabled)
-            item3 = self.tableWidget.item(row, 3)
+            item3 = self.tableWidget.item(row, 4)
             item3.setFlags(QtCore.Qt.ItemIsEnabled)
-            item4 = self.tableWidget.item(row, 4)
+            item4 = self.tableWidget.item(row, 5)
             item4.setFlags(QtCore.Qt.ItemIsEnabled)
 
     def cell_changed(self, row, col):
         # 在这里实现您的代码，知道发生更改的行和列
-        conn = pymssql.connect(server='(local)', user='sa', password='Mrma0807.', database='test')
+        conn = pymssql.connect(server='(local)', user='sa', password='Mrma0807.', database='StudentManage',
+                               charset='cp936')
         cursor = conn.cursor()
         print("Cell changed at row %d, column %d" % (row, col))
         item = self.tableWidget.item(row, col)
-        item_name = ['Sno', 'Sname', 'Sdeptno', 'Sclassno', 'Sdormarea', 'Sage']
+        item_name = ['Sno', 'Sname', 'Sage', 'Sdeptno', 'Sclassno', 'Sdormarea']
         index = self.tableWidget.item(row, 0)
         new_content = item.text()
+        new_content = new_content.encode('cp936')
+        print(new_content)
         sno = index.text()
         sql = "update student set " + item_name[col] + " = %s where Sno = %s"
         # print(sql)
@@ -52,7 +55,8 @@ class Widget_main(QtWidgets.QWidget, Admin):
         self.init_table()
 
     def init_table(self):
-        conn = pymssql.connect(server='(local)', user='sa', password='Mrma0807.', database='test')
+        conn = pymssql.connect(server='(local)', user='sa', password='Mrma0807.', database='StudentManage',
+                               charset='cp936')
         cursor = conn.cursor()
         self.tableWidget.cellChanged.disconnect(self.cell_changed)
         self.tableWidget.setRowCount(0)
@@ -77,7 +81,8 @@ class Widget_main(QtWidgets.QWidget, Admin):
 
     def search_student(self):
         self.tableWidget.cellChanged.disconnect(self.cell_changed)
-        conn = pymssql.connect(server='(local)', user='sa', password='Mrma0807.', database='test')
+        conn = pymssql.connect(server='(local)', user='sa', password='Mrma0807.', database='StudentManage',
+                               charset='cp936')
         cursor = conn.cursor()
         sno = self.lineEdit.text()
         if sno:
@@ -109,9 +114,10 @@ class Widget_main(QtWidgets.QWidget, Admin):
         change_class_window.show()
 
     def check(self):
-        conn = pymssql.connect(server='(local)', user='sa', password='Mrma0807.', database='test', charset='cp936')
+        conn = pymssql.connect(server='(local)', user='sa', password='Mrma0807.', database='StudentManage',
+                               charset='cp936')
         cursor = conn.cursor()
-        sql = 'select dno, dname, dnumber from dept'
+        sql = 'select dno, dname, dcount from dept'
         cursor.execute(sql)
         rows = cursor.fetchall()
         sql1 = 'select * from student where sdeptno = %s'
@@ -122,7 +128,7 @@ class Widget_main(QtWidgets.QWidget, Admin):
             dnumber = ele[2]
             stu_number = len(cursor.fetchall())
             if dnumber != stu_number:
-                sql2 = 'update dept set dnumber = %s where dno = %s'
+                sql2 = 'update dept set dcount = %s where dno = %s'
                 cursor.execute(sql2, (stu_number, dno))
                 conn.commit()
                 info = '系号：' + str(dno) + '   系名：' + str(ele[1]) + '   原人数：' + str(dnumber) + '   实际人数：' + str(
@@ -173,16 +179,19 @@ class Widget_Add(QtWidgets.QWidget, Add):
         self.pushButton_2.clicked.connect(self.return_main)
 
     def add_student(self):
-        conn = pymssql.connect(server='(local)', user='sa', password='Mrma0807.', database='test')
+        conn = pymssql.connect(server='(local)', user='sa', password='Mrma0807.', database='StudentManage',
+                               charset='cp936')
         cursor = conn.cursor()
         sno = self.lineEdit.text()
         sname = self.lineEdit_2.text()
+        sname = sname.encode('cp936')
         sdept = self.lineEdit_3.text()
         sclass = self.lineEdit_4.text()
         sdormarea = self.lineEdit_5.text()
+        sdormarea = sdormarea.encode('cp936')
         sage = self.lineEdit_6.text()
         sql = 'insert into student values(%s,%s,%s,%s,%s,%s)'
-        cursor.execute(sql, (sno, sname, sdept, sclass, sdormarea, sage))
+        cursor.execute(sql, (sno, sname, sage, sdept, sclass, sdormarea))
         conn.commit()
         conn.close()
         self.close()
@@ -206,7 +215,8 @@ class Widget_Delete(QtWidgets.QWidget, Delete):
         self.pushButton_2.clicked.connect(self.return_main)
 
     def delete_student(self):
-        conn = pymssql.connect(server='(local)', user='sa', password='Mrma0807.', database='test')
+        conn = pymssql.connect(server='(local)', user='sa', password='Mrma0807.', database='StudentManage',
+                               charset='cp936')
         cursor = conn.cursor()
         sno = self.lineEdit.text()
         sql = 'delete from student where sno=%s'
@@ -234,7 +244,8 @@ class Widget_ChangeClass(QtWidgets.QWidget, ChangeClass):
         self.pushButton_2.clicked.connect(self.return_main)
 
     def change_class(self):
-        conn = pymssql.connect(server='(local)', user='sa', password='Mrma0807.', database='test')
+        conn = pymssql.connect(server='(local)', user='sa', password='Mrma0807.', database='StudentManage',
+                               charset='cp936')
         cursor = conn.cursor()
         old = self.lineEdit.text()
         new = self.lineEdit_2.text()
@@ -279,11 +290,12 @@ class Widget_Attend(QtWidgets.QWidget, Attend):
         self.pushButton_2.clicked.connect(self.return_main)
 
     def add_attend(self):
-        conn = pymssql.connect(server='(local)', user='sa', password='Mrma0807.', database='test', charset='cp936')
+        conn = pymssql.connect(server='(local)', user='sa', password='Mrma0807.', database='StudentManage',
+                               charset='cp936')
         cursor = conn.cursor()
         sno = self.lineEdit.text()
         uno = self.lineEdit_2.text()
-        sql = 'insert into attention values(%s,%s)'
+        sql = 'insert into attend values(%s,%s)'
         cursor.execute(sql, (sno, uno))
         conn.commit()
         conn.close()
